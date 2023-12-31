@@ -1,0 +1,115 @@
+<div class="container">
+  <h1 class="text-center text-black">Reservations</h1>
+
+  <table class="table shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+    <thead>
+    <tr class="text-center">
+      <th>ID</th>
+      <th>Nom</th>
+      <th>Date</th>
+      <th>Duree</th>
+      <th>Contexte</th>
+      <th>Resource ID</th>
+      <th>ID Personne</th>
+      <th>Personne</th>
+      <th>Resource</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let r of reservations" class="text-center">
+      <td>{{ r.id }}</td>
+      <td>{{ r.nom }}</td>
+      <td>{{ r.date }}</td>
+      <td>{{ r.duree }}</td>
+      <td>{{ r.contexte }}</td>
+      <td>{{ r.resourceId }}</td>
+      <td>{{ r.idPersonne }}</td>
+      <td class="text-center">
+        <button class="btn" (click)="getPersonne(r.personne)" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <i class="bi bi-person-circle"></i>
+        </button>
+      </td>
+      <td class="text-center">
+        <button class="btn" (click)="getResource(r.resource)" data-bs-toggle="modal" data-bs-target="#resource_modal">
+          <i class="bi bi-bag-heart-fill text-success"></i>
+        </button>
+      </td>
+      <td class="text-center">
+        <button class="btn" (click)="deleteReservation(r.id)">
+          <i class="bi bi-trash text-danger"></i>
+        </button>
+        <button class="btn" data-bs-toggle="modal" data-bs-target="#updateModal" (click)="editReservation(r)">
+          <i class="bi bi-pen text-info"></i>
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- Modal personne-->
+<div class="modal fade" id="exampleModal"  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5 text-center" >Personne Information</h1>
+        <button type="button" class="btn-close" aria-label="Close"  data-bs-dismiss="modal" ></button>
+      </div>
+      <div class="modal-body text-center">
+        <span class="fw-bold">ID: </span>{{personne?.id}}<br>
+        <span class="fw-bold">Nom: </span>{{personne?.nom}}<br>
+        <span class="fw-bold">Email: </span>{{personne?.email}}<br>
+        <span class="fw-bold">Fonction: </span>{{personne?.fonction}}
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Resources-->
+<div class="modal fade" id="resource_modal"  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5 text-center" >Resource Information</h1>
+        <button type="button" class="btn-close" aria-label="Close"  data-bs-dismiss="modal" ></button>
+      </div>
+      <div class="modal-body text-center">
+        <span class="fw-bold">ID: </span>{{resource?.id}}<br>
+        <span class="fw-bold">Nom: </span>{{resource?.nom}}<br>
+        <span class="fw-bold">Type: </span>{{resource?.type}}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Update Modal-->
+<div class="modal fade" id="updateModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5 text-center">Edit Reservation Information</h1>
+        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <form (ngSubmit)="lastEdit(nom.value, duree.value, contexte.value)">
+          <div class="modal-body text-center">
+            <span class="fw-bold">Nom: </span><br>
+            <input type="text" class="form-control" #nom value="{{edit?.nom}}">
+            <span class="fw-bold">Duree: </span><br>
+            <input type="text" class="form-control" #duree value="{{edit?.duree}}"><br>
+            <span class="fw-bold">Contexte: </span><br>
+            <textarea class="form-control" #contexte value="{{edit?.contexte}}"></textarea><br>
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-info d-grid gap-2">Edit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+

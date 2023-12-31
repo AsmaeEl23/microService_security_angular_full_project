@@ -1,0 +1,29 @@
+<div class="container">
+  <h1 class="text-center text-black">Personnes</h1>
+  <table class="table shadow-lg p-3 mb-5 bg-body-tertiary rounded">
+    <thead>
+      <tr class="text-center">
+        <th>ID</th><th>Nom</th><th>Email</th><th>Fonction</th><th>Actions</th><th>Reservations</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let p of personnes" class="text-center">
+        <td>{{p.id}}</td>
+        <td>{{p.nom}}</td>
+        <td>{{p.email}}</td>
+        <td>{{p.fonction}}</td>
+        <td>
+        <button class="btn" (click)="deletePersonne(p.id)">
+          <i class="bi bi-trash text-danger"></i>
+        </button>
+        <button class="btn"  data-bs-toggle="modal" data-bs-target="#updateModal" (click)="editPersonne(p)">
+          <i class="bi bi-pen text-info"></i>
+        </button>
+        </td>
+        <td>
+          <button class="btn btn-success" (click)="getReservations(p.id)">Get Reservations</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
