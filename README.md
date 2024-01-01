@@ -196,5 +196,150 @@ function initializeKeycloak(keycloak: KeycloakService) {
 <h2>Docker</h2>
 <h5>DockerCompose file</h5>
 <pre>
+services:
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service
+    restart: always
+    ports:
+      - '8761:8761'
+    expose:
+      - '8761'
 
+  config-service:
+    build: ./config-service
+    container_name: config-service
+    restart: always
+    ports:
+      - '9999:9999'
+    expose:
+      - '9999'
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8761/eureka
+    depends_on:
+      - discovery-service
+
+  gateway-service:
+    build: ./gateway-service
+    container_name: gateway-service
+    restart: always
+    ports:
+      - '8888:8888'
+    expose:
+      - '8888'
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8761/eureka
+      - CONFIG_SERVICE_URL=http://config-service:9999
+    depends_on:
+      - config-service
+
+  # postgres-keycloak-db ---------------------------
+  postgres-keycloak-db:
+    image: postgres
+    container_name: postgres-keycloak-db
+    volumes:
+      - postgres_keycloak_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    restart: always
+    ports:
+      - '5432:5432'
+    expose:
+      - '5432'
+    healthcheck:
+      test: "exit 0"
+
+  # pgadmin-keycloak ---------------------------
+  pgadmin-keycloak:
+    image: dpage/pgadmin4
+    container_name: pgadmin-keycloak
+    restart: always
+    ports:
+      - "44:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin_keycloak_data:/var/lib/pgadmin
+
+  # keycloak-service ---------------------------
+  keycloak-service:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak-service
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres-keycloak-db:5432/keycloak_db
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+    command:
+      - start-dev
+    restart: always
+    ports:
+      - '8080:8080'
+    expose:
+      - '8080'
+    depends_on:
+      - postgres-keycloak-db
+
+  resources-service:
+    build: ./resources-service
+    container_name: resources-service
+    restart: always
+    ports:
+      - '8082:8082'
+    expose:
+      - '8082'
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8761/eureka
+      - CONFIG_SERVICE_URL=http://config-service:9999
+      - ISSUER_URI=http://localhost:8080/realms/app-realm
+      - JWK_SET_URI=http://keycloak-service:8080/realms/app-realm/protocol/openid-connect/certs
+    depends_on:
+      - config-service
+      - keycloak-service
+
+  reservation-service:
+    build: ./reservation-service
+    container_name: reservation-service
+    restart: always
+    ports:
+      - '8081:8081'
+    expose:
+      - '8081'
+    environment:
+      - DISCOVERY_SERVICE_URL=http://discovery-service:8761/eureka
+      - CONFIG_SERVICE_URL=http://config-service:9999
+      - ISSUER_URI=http://localhost:8080/realms/app-realm
+      - JWK_SET_URI=http://keycloak-service:8080/realms/app-realm/protocol/openid-connect/certs
+    depends_on:
+      - resource-service
+
+  angular-front-app:
+    build: ./angular-front-app
+    container_name: angular-front-app
+    restart: always
+    ports:
+      - '8083:80'
+    expose:
+      - '8083'
+
+volumes:
+  pgadmin_keycloak_data:
+  postgres_keycloak_data:
 </pre>
+
+<h5>Dockerfile</h5>
+<pre>
+FROM openjdk:17-oracle
+VOLUME /tmp
+COPY target/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
+</pre>
+
+<h5> "mvn clean package -DskipTests" to generate the jar app</h5>
