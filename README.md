@@ -197,6 +197,7 @@ function initializeKeycloak(keycloak: KeycloakService) {
 <h5>DockerCompose file</h5>
 <pre>
 services:
+  #  --------------------------- discovery-service ---------------------------
   discovery-service:
     build: ./discovery-service
     container_name: discovery-service
@@ -205,7 +206,7 @@ services:
       - '8761:8761'
     expose:
       - '8761'
-
+  #  --------------------------- config-service ---------------------------
   config-service:
     build: ./config-service
     container_name: config-service
@@ -218,7 +219,8 @@ services:
       - DISCOVERY_SERVICE_URL=http://discovery-service:8761/eureka
     depends_on:
       - discovery-service
-
+      
+  #  --------------------------- gateway-service ---------------------------
   gateway-service:
     build: ./gateway-service
     container_name: gateway-service
@@ -233,7 +235,7 @@ services:
     depends_on:
       - config-service
 
-  # postgres-keycloak-db ---------------------------
+  #  --------------------------- postgres-keycloak-db ---------------------------
   postgres-keycloak-db:
     image: postgres
     container_name: postgres-keycloak-db
@@ -251,7 +253,7 @@ services:
     healthcheck:
       test: "exit 0"
 
-  # pgadmin-keycloak ---------------------------
+  #  --------------------------- pgadmin-keycloak ---------------------------
   pgadmin-keycloak:
     image: dpage/pgadmin4
     container_name: pgadmin-keycloak
@@ -264,7 +266,7 @@ services:
     volumes:
       - pgadmin_keycloak_data:/var/lib/pgadmin
 
-  # keycloak-service ---------------------------
+  #  --------------------------- keycloak-service ---------------------------
   keycloak-service:
     image: quay.io/keycloak/keycloak:latest
     container_name: keycloak-service
@@ -286,7 +288,7 @@ services:
       - '8080'
     depends_on:
       - postgres-keycloak-db
-
+  #  --------------------------- resources-service ---------------------------
   resources-service:
     build: ./resources-service
     container_name: resources-service
@@ -303,6 +305,7 @@ services:
     depends_on:
       - config-service
       - keycloak-service
+  #  --------------------------- reservation-service ---------------------------
 
   reservation-service:
     build: ./reservation-service
@@ -319,7 +322,7 @@ services:
       - JWK_SET_URI=http://keycloak-service:8080/realms/app-realm/protocol/openid-connect/certs
     depends_on:
       - resource-service
-
+  #  --------------------------- angular-front-app ---------------------------
   angular-front-app:
     build: ./angular-front-app
     container_name: angular-front-app
@@ -343,3 +346,14 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 </pre>
 
 <h5> "mvn clean package -DskipTests" to generate the jar app</h5>
+<h5> "docker compose up -d --build " Start the containers</h5>
+<h5> "docker compose down " </h5>
+
+<h4>Eureka</h4>
+<img src="images/img_39.png">
+<h5>Create new realm in the dockerized keycloak </h5>
+<img src="images/img_40.png">
+<p>Client</p>
+<img src="images/img_41.png">
+<h3>Angular</h3>
+<img src="images/img_42.png">
